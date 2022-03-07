@@ -31,12 +31,14 @@ namespace skx{
 				return fd_;
 			}
 		protected:
+			int check_file();
+			
 			int fd_;
 			int open_flags_;
 			char *file_name_;
 			
 			static const mode_t OPEN_MODE = 0644;
-			static const int MAX_DISK_TIMES = 5;
+			static const int MAX_DISK_TIMES = 5;  //最多访问次数
 		};
 	}
 }
