@@ -8,12 +8,12 @@ namespace skx{
 		}
 		
 		FileOperation::~FileOperation(){
-			if(fd>=0){
+			if(fd_>=0){
 				::close(fd_);
 			}
 			
 			if(file_name_!=NULL){
-				free(file_name_);
+				::free(file_name_);
 				file_name_=NULL;
 			}
 		}
@@ -52,7 +52,7 @@ namespace skx{
 				
 				if(i>=MAX_DISK_TIMES) break;
 				
-				if(check_files()<0) return -errno;
+				if(check_file()<0) return -errno;
 				
 				read_len=::pread64(fd_,p_tmp,left,read_offset);
 				
@@ -83,7 +83,7 @@ namespace skx{
 		int FileOperation::pwrite_file(const char *buf,const int32_t nbytes,const int64_t offset){
 			int32_t left=nbytes;
 			int64_t write_offset=offset;
-			char *p_tmp=buf;
+			const char *p_tmp=buf;
 			int32_t write_len=0;
 			
 			int i=0;
@@ -93,7 +93,7 @@ namespace skx{
 				
 				if(i>=MAX_DISK_TIMES) break;
 				
-				if(check_files()<0) return -errno;
+				if(check_file()<0) return -errno;
 				
 				write_len=::pwrite64(fd_,p_tmp,left,write_offset);
 				
@@ -122,15 +122,17 @@ namespace skx{
 		
 		int FileOperation::write_file(const char *buf,const int32_t nbytes){
 			int32_t left=nbytes;
-			char *p_tmp=buf;
+			const char *p_tmp=buf;
 			int32_t write_len=0;
+			
+			int i=0;
 			
 			while(left>0){
 				++i;
 				
 				if(i>=MAX_DISK_TIMES) break;
 				
-				if(check_files()<0) return -errno;
+				if(check_file()<0) return -errno;
 				
 				write_len=::write(fd_,p_tmp,left);
 				
@@ -163,7 +165,7 @@ namespace skx{
 			
 			struct stat statbuf;
 			if(fstat(fd,&statbuf)!=0){
-				return -1
+				return -1;
 			}
 			
 			return statbuf.st_size;
