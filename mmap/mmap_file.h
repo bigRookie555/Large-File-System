@@ -5,13 +5,7 @@
 #include "common.h"
 
 namespace skx{
-	namespace LFS{
-		struct MMapOption{
-			int32_t max_mmap_size_;
-			int32_t first_mmap_size_;
-			int32_t per_mmap_size_;
-		};
-	
+	namespace LFS{	
 		class MMapFile{
 		public:
 			MMapFile();
