@@ -28,7 +28,7 @@ int main(){
 	if(fd<0) {
 		return -1;
 		fprintf(stderr,"open file failed. filename:%s,error desc:%s\n",filename,strerror(-fd));
-	}
+	}                                                                                      
 	
 	MMapFile *map_file=new MMapFile(mmap_option,fd);
 	

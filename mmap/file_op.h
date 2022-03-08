@@ -16,8 +16,8 @@ namespace skx{
 			int flush_file(); //把文件立即写入到磁盘
 			int unlink_file();
 			
-			int pread_file(char *buf,const int32_t nbytes,const int64_t offset);
-			int pwrite_file(const char *buf,const int32_t nbytes,const int64_t offset); 
+			virtual int pread_file(char *buf,const int32_t nbytes,const int64_t offset);
+			virtual int pwrite_file(const char *buf,const int32_t nbytes,const int64_t offset); 
 			
 			int write_file(const char *buf,const int32_t nbytes);
 			
