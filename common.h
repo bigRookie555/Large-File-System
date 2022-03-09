@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
+
 namespace skx{
 	namespace LFS{
 		const int32_t EXIT_DISK_OPER_INCOMPLETE = -8012; //读或写的长度小于要求长度
