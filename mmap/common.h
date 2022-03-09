@@ -15,12 +15,24 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <assert.h>
+#include <sstream>
+
 
 namespace skx{
 	namespace LFS{
 		const int32_t EXIT_DISK_OPER_INCOMPLETE = -8012; //读或写的长度小于要求长度
 		const int32_t TFS_SUCCESS = 0;
 		const int32_t TFS_ERROR = -1;
+		const int32_t EXIT_INDEX_ALREADY_LOADED_ERROR=-8013;
+		const int32_t EXIT_META_UNEXPECT_FOUND_ERROR = -8014;  
+		const int32_t EXIT_INDEX_CORRUPT_ERROR = -8015; 
+		const int32_t EXIT_BLOCKID_CONFLICT_ERROR=-8016;
+		const int32_t EXIT_BUCKET_CONFIGURE_ERROR=-8017;
+		
+		static const std::string MAINBLOCK_DIR_PREFIX = "/mainblock/";
+		static const std::string INDEX_DIR_PREFIX = "/index/";
+		static const mode_t DIR_MODE = 0755;  //目录权限
 		
 		struct MMapOption{
 			int32_t max_mmap_size_;
