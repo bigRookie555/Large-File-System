@@ -26,7 +26,22 @@ int main(int argc,char *argv[]){
 		exit(-1);
 	}
 	
-	//1.生成主块文件
+	
+	
+	//1.创建索引文件
+	LFS::IndexHandle *index_handle = new LFS::IndexHandle(".",block_id);  //索引文件句柄
+	
+	if(debug) printf("init index...\n");
+	
+	ret=index_handle->create(block_id,bucket_size,mmap_option);
+	
+	if(ret!=LFS::TFS_SUCCESS){
+		fprintf(stderr,"init index %d failed\n",block_id);
+		delete index_handle;
+		exit(-3);
+	}
+	
+	//2.生成主块文件
 	std::stringstream tmp_stream;
 	tmp_stream<<"."<<LFS::MAINBLOCK_DIR_PREFIX<<block_id;
 	tmp_stream>>mainblock_path;
@@ -37,21 +52,9 @@ int main(int argc,char *argv[]){
 	
 	if(ret!=0){
 		fprintf(stderr,"create main block %s failed. reason: %s\n",mainblock_path.c_str(),strerror(errno));
-		exit(-2);
-	}
-	
-	//2.创建索引文件
-	LFS::IndexHandle *index_handle = new LFS::IndexHandle(".",block_id);  //索引文件句柄
-	
-	if(debug) printf("init index...\n");
-	
-	ret=index_handle->create(block_id,bucket_size,mmap_option);
-	
-	if(ret!=LFS::TFS_SUCCESS){
-		fprintf(stderr,"init index %d failed\n",block_id);
 		delete mainblock;
 		delete index_handle;
-		exit(-3);
+		exit(-2);
 	}
 	
 	//其他操作

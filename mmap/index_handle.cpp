@@ -123,5 +123,15 @@ namespace skx{
 			
 			return TFS_SUCCESS;
 		}
+		
+		int IndexHandle::remove(const uint32_t logic_block_id){
+			if(is_load_){
+				if(logic_block_id!=block_info()->block_id_){
+					fprintf(stderr,"block id conflict. blockid:%d,index blockid:%d\n",logic_block_id,block_info()->block_id_);
+					return EXIT_BLOCKID_CONFLICT_ERROR;
+				}
+			}
+			
+		}
 	}
 }
