@@ -53,11 +53,13 @@ int main(int argc,char *argv[]){
 	if(ret!=0){
 		fprintf(stderr,"create main block %s failed. reason: %s\n",mainblock_path.c_str(),strerror(errno));
 		delete mainblock;
-		delete index_handle;
+		index_handle->remove(block_id);
 		exit(-2);
 	}
 	
 	//其他操作
+	mainblock->close_file();
+	index_handle_->flush();
 	
 	return 0;
 }

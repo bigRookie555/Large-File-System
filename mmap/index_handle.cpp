@@ -132,6 +132,11 @@ namespace skx{
 				}
 			}
 			
+			int ret = file_op->munmap_file();
+			if( TFS_SUCCESS!=ret) return ret;
+			
+			ret=file_op_->unlink_file();
+			return ret;
 		}
 	}
 }
