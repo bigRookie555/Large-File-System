@@ -30,6 +30,8 @@ namespace skx{
 			
 			int remove(const uint32_t logic_block_id); //munmap  &  unlink file
 			
+			int flush();
+			
 			IndexHeader *index_header(){  //用来访问内存映射区的 indexheader
 				return reinterpret_cast<IndexHeader*>(file_op_->get_map_data()); //强制类型转换
 			} // 返回内存映射的地址
