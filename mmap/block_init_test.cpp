@@ -59,7 +59,10 @@ int main(int argc,char *argv[]){
 	
 	//其他操作
 	mainblock->close_file();
-	index_handle_->flush();
+	index_handle->flush();
+	
+	delete mainblock;
+	delete index_handle;
 	
 	return 0;
 }
