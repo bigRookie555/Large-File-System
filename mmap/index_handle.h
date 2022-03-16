@@ -43,6 +43,11 @@ namespace skx{
 			int32_t bucket_size() const{
 				return reinterpret_cast<IndexHeader*>(file_op_->get_map_data())->bucket_size_;
 			}
+			
+			int32_t get_block_data_offset() const{
+				return data_file_offset_;
+			}
+			
 		private:
 			MMapFileOperation *file_op_;
 			bool is_load_;
