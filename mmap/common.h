@@ -29,6 +29,7 @@ namespace skx{
 		const int32_t EXIT_INDEX_CORRUPT_ERROR = -8015; 
 		const int32_t EXIT_BLOCKID_CONFLICT_ERROR=-8016;
 		const int32_t EXIT_BUCKET_CONFIGURE_ERROR=-8017;
+		const int32_t EXIT_META_NOT_FOUND_ERROR = -8018;
 		
 		static const std::string MAINBLOCK_DIR_PREFIX = "/mainblock/";
 		static const std::string INDEX_DIR_PREFIX = "/index/";
