@@ -148,5 +148,113 @@ namespace skx{
 			
 			return ret;
 		}
+		
+		int IndexHandle::update_block_info(const OperType oper_type,const uint32_t modify_size){
+			if(block_info()->block_id_ == 0){
+				return EXIT_BLOCKID_ZERO_ERROR;
+			}
+			
+			if(oper_type == C_OPER_INSERT){
+				++block_info()->version_;
+				++block_info()->file_count_;
+				++block_info()->seq_no_;
+				block_info()->size_t_+=modify_size;
+			}
+			
+			if(debug) printf("update_block_info. blockid %u\n",block_info()->block_id_);
+			
+			return TFS_SUCCESS;
+		}
+		
+		int IndexHandle::write_segment_meta(const uint64_t key,MetaInfo &meta){
+			int32_t current_offset = 0, previous_offset = 0;
+			
+			int ret = hash_find(key,current_offset,previous_offset);
+			if(ret == TFS_SUCCESS) return EXIT_META_UNEXPECT_FOUND_ERROR;
+			else if(ret != EXIT_META_NOT_FOUND_ERROR) return ret;
+			
+			ret = hash_insert(key,previous_offset,meta);
+			return ret;
+		}
+		
+		int32_t IndexHandle::read_segment_meta(const uint64_t key, MetaInfo &meta){
+			int32_t current_offset = 0, previous_offset = 0;
+			
+			//1.确定key存储的桶(slot)的位置
+			//int32_t slot = static_cast<uint32_t>(key)%bucket_size();
+			
+			int ret = hash_find(key,current_offset,previous_offset);
+			
+			if(ret == TFS_SUCCESS){
+				ret = file_op_->pread_file(reinterpret_cast<char*>(&meta),sizeof(meta),current_offset);
+				return ret;
+			}
+			else return ret;
+		}
+		
+		int32_t IndexHandle::hash_find(const uint64_t key,int32_t &current_offset,int32_t& previous_offset){
+			int ret=TFS_SUCCESS;
+			MetaInfo meta_info;
+			current_offset=0,previous_offset=0;
+			
+			int32_t slot=(int32_t)key%bucket_size();
+			
+			int32_t pos=bucket_slot()[slot]; //若为0，表示该桶为空
+			
+			for(;pos!=0;){
+				file_op_->pread_file(reinterpret_cast<char*>(&meta_info),sizeof(MetaInfo),pos);
+				if(TFS_SUCCESS != ret) return ret;
+				
+				if(hash_compare(key,meta_info.get_key())){
+					current_offset = pos;
+					return TFS_SUCCESS;
+				}
+				
+				previous_offset = pos;
+				pos=meta_info.get_next_meta_offset();
+			}
+			
+			return EXIT_META_NOT_FOUND_ERROR;
+		}
+		
+		int32_t IndexHandle::hash_insert(const uint64_t key,int32_t previous_offset,MetaInfo &meta){
+			int ret = TFS_SUCCESS;
+			MetaInfo tmp_meta_info;
+			
+			//确定key存储的桶
+			int32_t slot = static_cast<uint32_t>(key)%bucket_size();
+			//确定meta结点在索引文件中存储的偏移量
+			int32_t current_offset = index_header()->index_file_size_;
+			index_header()->index_file_size_+=sizeof(MetaInfo);
+			//将meta结点写入索引文件
+			meta.set_next_meta_offset(0);
+			
+			ret = file_op_->pwrite_file(reinterpret_cast<const char*>(&meta),sizeof(MetaInfo),current_offset);
+			if(TFS_SUCCESS != ret){
+				index_header()->index_file_size_-=sizeof(MetaInfo);
+				return ret;
+			}
+			
+			//将meta结点链接至pre结点之后
+			if(previous_offset != 0){
+				ret = file_op_->pread_file(reinterpret_cast<char*>(&tmp_meta_info),sizeof(MetaInfo),previous_offset);
+				if(ret != TFS_SUCCESS){
+					index_header()->index_file_size_-=sizeof(MetaInfo);
+					return ret;
+				}
+				
+				tmp_meta_info.set_next_meta_offset(current_offset);
+				ret = file_op_->pwrite_file(reinterpret_cast<const char*>(&tmp_meta_info),sizeof(MetaInfo),previous_offset);
+				if(ret != TFS_SUCCESS){
+					index_header()->index_file_size_-=sizeof(MetaInfo);
+					return ret;
+				}
+			}
+			else{
+				bucket_slot()[slot] = current_offset;
+			}
+			
+			return TFS_SUCCESS;
+		}
 	}
 }

@@ -36,9 +36,15 @@ namespace skx{
 				return reinterpret_cast<IndexHeader*>(file_op_->get_map_data()); //强制类型转换
 			} // 返回内存映射的地址
 			
+			int update_block_info(const OperType oper_type,const uint32_t modify_size);
+			
 			BlockInfo *block_info(){  //用来访问内存映射区的 block info
 				return reinterpret_cast<BlockInfo *>(file_op_->get_map_data()); //强制类型转换
 			} // 返回内存映射的地址
+			
+			int32_t* bucket_slot(){
+				return reinterpret_cast<int32_t*>(reinterpret_cast<char*>(file_op_->get_map_data())+sizeof(IndexHeader)); //获得哈希数组的首地址
+			}
 			
 			int32_t bucket_size() const{
 				return reinterpret_cast<IndexHeader*>(file_op_->get_map_data())->bucket_size_;
@@ -48,7 +54,21 @@ namespace skx{
 				return reinterpret_cast<IndexHeader*>(file_op_->get_map_data())->data_file_offset_;
 			}
 			
+			void commit_block_data_offset(const int file_size){
+				reinterpret_cast<IndexHeader*>(file_op_->get_map_data())->data_file_offset_+=file_size;
+			}
+			
+			int32_t write_segment_meta(const uint64_t key,MetaInfo &meta);
+			int32_t read_segment_meta(const uint64_t key, MetaInfo &meta);
+			
+			int32_t hash_find(const uint64_t key,int32_t &current_offset,int32_t& previous_offset);
+			
+			int32_t hash_insert(const uint64_t key,int32_t previous_offset,MetaInfo &meta);
 		private:
+			bool hash_compare(const uint64_t left_key,const uint64_t right_key) {
+				return left_key==right_key;
+			}
+		
 			MMapFileOperation *file_op_;
 			bool is_load_;
 		};

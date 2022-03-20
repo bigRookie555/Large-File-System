@@ -55,7 +55,7 @@ int main(int argc,char *argv[]){
 	
 	uint32_t file_no = index_handle->block_info()->seq_no_;
 	
-	if(ret=mainblock->pwrite_file(buffer,sizeof(buffer),data_offset)!= TFS_SUCCESS){
+	if(ret=mainblock->pwrite_file(buffer,sizeof(buffer),data_offset)!= LFS::TFS_SUCCESS){
 		fprintf(stderr,"write to main block failed. ret: %d, reason: %s\n",ret,strerror(errno));
 		
 		mainblock->close_file();
@@ -66,11 +66,32 @@ int main(int argc,char *argv[]){
 	}
 	
 	//3.索引文件中写入metainfo
-	LFS::Metainfo meta;
+	LFS::MetaInfo meta;
 	meta.set_file_id(file_no);
 	meta.set_offset(data_offset);
 	meta.set_size(sizeof(buffer));
 	
+	ret = index_handle->write_segment_meta(meta.get_key(),meta);
+	
+	if(ret == LFS::TFS_SUCCESS){
+		//更新索引头部信息
+		index_handle->commit_block_data_offset(sizeof(buffer));
+		//更新块信息
+		index_handle->update_block_info(LFS::C_OPER_INSERT,sizeof(buffer));
+		
+		ret = index_handle->flush();
+		if(ret != LFS::TFS_SUCCESS){
+			fprintf(stderr,"flush mainblock %d failed. file no: %u\n",block_id,file_no);
+		}
+	}
+	else{
+		fprintf(stderr,"write_segement_meta mainblock:%d failed. file no:%u\n",block_id,file_no);
+	}
+	
+	if(ret != LFS::TFS_SUCCESS) fprintf(stderr,"write to mainblock %d failed. file no: %u\n",block_id,file_no);
+	else if(debug) printf("write successfully. file no: %u, block id: %d\n", file_no, block_id);
+	
+	mainblock->close_file();
 	
 	delete mainblock;
 	delete index_handle;

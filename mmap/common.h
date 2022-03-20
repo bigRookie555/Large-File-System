@@ -30,10 +30,16 @@ namespace skx{
 		const int32_t EXIT_BLOCKID_CONFLICT_ERROR=-8016;
 		const int32_t EXIT_BUCKET_CONFIGURE_ERROR=-8017;
 		const int32_t EXIT_META_NOT_FOUND_ERROR = -8018;
+		const int32_t EXIT_BLOCKID_ZERO_ERROR = -8019;
 		
 		static const std::string MAINBLOCK_DIR_PREFIX = "/mainblock/";
 		static const std::string INDEX_DIR_PREFIX = "/index/";
 		static const mode_t DIR_MODE = 0755;  //目录权限
+		
+		enum OperType{
+			C_OPER_INSERT = 1,
+			C_OPER_DELETE
+		};
 		
 		struct MMapOption{
 			int32_t max_mmap_size_;
